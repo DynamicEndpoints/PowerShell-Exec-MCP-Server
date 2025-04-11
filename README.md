@@ -15,13 +15,6 @@ Clone the repository and set up the server:
 git clone https://github.com/yourusername/mcp-powershell-exec.git
 cd mcp-powershell-exec
 ```
-## In Action
-
-Watch the video to see MCP PowerShell Exec Server in action:
-
-<a href="https://youtu.be/XmYaCJ0bNsE"><img src="https://img.youtube.com/vi/XmYaCJ0bNsE/0.jpg" width="600"/></a>
-
-## Usage
 
 ### Integration with GitHub Copilot in VSCode Insiders
 
