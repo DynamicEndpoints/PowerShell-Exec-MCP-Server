@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-powershell-exec"
+version = "0.1.0"
+description = "MCP server for secure PowerShell command execution"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+dependencies = [
+    "mcp[cli]>=1.6.0",
+]
+
+[project.scripts]
+mcp-powershell-exec = "mcp_powershell_exec.__main__:main"
