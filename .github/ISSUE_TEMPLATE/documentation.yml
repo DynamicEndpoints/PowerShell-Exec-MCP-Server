@@ -1,0 +1,74 @@
+---
+name: 📋 Documentation Update
+about: Request documentation improvements optimized for Copilot contributions
+title: '[DOCS] '
+labels: ['documentation', 'copilot-ready']
+assignees: ''
+---
+
+## 📋 Documentation Update Request
+
+**Documentation Type:**
+- [ ] **API Documentation** - Tool/resource/prompt documentation
+- [ ] **User Guide** - Usage instructions and examples
+- [ ] **Developer Guide** - Contributing and development setup
+- [ ] **README Update** - Main project documentation
+- [ ] **Code Comments** - Inline documentation improvements
+- [ ] **Examples** - Usage examples and tutorials
+
+**Files to Update:**
+- [ ] `README.md`
+- [ ] `FEATURES_UPDATE.md`
+- [ ] Code docstrings in `server.py`
+- [ ] Template documentation in `templates/`
+- [ ] Other: 
+
+## 📝 Current Documentation Issues
+
+**What's missing or unclear:**
+
+**What needs improvement:**
+
+**Target audience:**
+- [ ] End users (MCP client developers)
+- [ ] Contributors (developers extending the server)
+- [ ] System administrators (deployment/configuration)
+
+## ✨ Requested Improvements
+
+**Specific changes needed:**
+1. 
+2. 
+3. 
+
+**New sections to add:**
+
+**Examples to include:**
+
+## 🤖 Copilot Guidance
+
+**Documentation Style:**
+- Use clear, concise language
+- Include code examples for all features
+- Add step-by-step instructions where applicable
+- Use consistent formatting and structure
+
+**Code Example Format:**
+```markdown
+### Tool Usage Example
+
+\`\`\`python
+# Using the PowerShell execution tool
+result = await mcp.call_tool("run_powershell", {
+    "code": "Get-ComputerInfo | ConvertTo-Json",
+    "timeout": 60
+})
+\`\`\`
+
+\`\`\`powershell
+# PowerShell code example
+Get-Service | Where-Object {$_.Status -eq 'Running'} | Select-Object Name, Status
+\`\`\`
+```
+
+**Reference existing documentation patterns in the project for consistency.**

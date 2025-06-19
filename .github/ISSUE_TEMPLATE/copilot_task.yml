@@ -1,0 +1,228 @@
+---
+name: 🤖 Copilot Task Request
+about: Request a specific coding task optimized for Copilot implementation
+title: '[COPILOT-TASK] '
+labels: ['copilot-task', 'development', 'needs-implementation']
+assignees: ''
+---
+
+## 🤖 Copilot Task Overview
+
+**Task Type:**
+- [ ] **Bug Fix** - Fix a specific issue
+- [ ] **Feature Implementation** - Add new functionality
+- [ ] **Code Refactoring** - Improve existing code
+- [ ] **Performance Optimization** - Optimize performance
+- [ ] **Testing** - Add or improve tests
+- [ ] **Documentation** - Update documentation
+- [ ] **Security Enhancement** - Improve security
+- [ ] **Code Cleanup** - Clean up technical debt
+
+**Priority Level:**
+- [ ] 🔴 Critical (Security/Breaking issue)
+- [ ] 🟡 High (Important feature/significant bug)
+- [ ] 🟢 Medium (Enhancement/minor bug)
+- [ ] 🔵 Low (Nice-to-have/cleanup)
+
+## 📝 Task Description
+
+**Clear Task Statement:**
+<!-- One clear sentence describing exactly what needs to be done -->
+
+**Detailed Requirements:**
+1. 
+2. 
+3. 
+
+**Success Criteria:**
+<!-- How will we know this task is complete? -->
+- [ ] 
+- [ ] 
+- [ ] 
+
+## 📍 Code Context for Copilot
+
+**Primary Files to Modify:**
+- [ ] `server.py` - Main MCP server implementation
+- [ ] `templates/` - PowerShell script templates
+- [ ] `pyproject.toml` - Project configuration
+- [ ] `README.md` - Documentation
+- [ ] `tests/` - Test files
+- [ ] Other: 
+
+**Existing Code to Reference:**
+<!-- Point Copilot to relevant existing implementations -->
+```python
+# Function/class names to examine:
+# - execute_powershell() - for PowerShell execution patterns
+# - run_powershell_with_progress() - for progress reporting patterns
+# - get_system_info_resource() - for resource implementation patterns
+```
+
+**Code Patterns to Follow:**
+- Error handling pattern: Try-catch with proper MCP exceptions
+- Logging pattern: Use ctx.info(), ctx.error() when available
+- Type hints: Use proper typing throughout
+- Docstrings: Follow existing docstring format
+- Async patterns: Use async/await for I/O operations
+
+## 🛠️ Implementation Specifications
+
+**Function Signature (if applicable):**
+```python
+@mcp.tool()  # or @mcp.resource() or @mcp.prompt()
+async def new_function_name(
+    param1: str,
+    param2: Optional[int] = None,
+    ctx: Optional[Context] = None
+) -> ReturnType:
+    """
+    Brief description of what this function does.
+    
+    Args:
+        param1: Description of parameter
+        param2: Description of optional parameter  
+        ctx: MCP context for logging and progress reporting
+        
+    Returns:
+        Description of return value
+        
+    Raises:
+        ValueError: When input validation fails
+        RuntimeError: When operation fails
+    """
+```
+
+**Input/Output Specifications:**
+- **Input format:** 
+- **Output format:** 
+- **Error conditions:** 
+
+**Performance Requirements:**
+- Maximum execution time: 
+- Memory usage: 
+- Concurrent operations: 
+
+## 🧪 Testing Requirements
+
+**Test Cases to Implement:**
+```python
+async def test_new_functionality():
+    """Test the new functionality"""
+    # Test case 1: Normal operation
+    
+    # Test case 2: Edge cases
+    
+    # Test case 3: Error conditions
+```
+
+**Manual Testing Steps:**
+1. 
+2. 
+3. 
+
+**Integration Testing:**
+- [ ] Test with MCP protocol
+- [ ] Test with PowerShell integration
+- [ ] Test with existing tools/resources
+- [ ] Test error scenarios
+
+## 📋 Step-by-Step Implementation Guide
+
+**Phase 1: Planning**
+- [ ] Review existing code patterns
+- [ ] Identify dependencies and imports needed
+- [ ] Plan function structure and flow
+
+**Phase 2: Core Implementation**
+- [ ] Implement main functionality
+- [ ] Add input validation
+- [ ] Add error handling
+- [ ] Add logging and progress reporting
+
+**Phase 3: Integration**
+- [ ] Register with MCP server (add decorators)
+- [ ] Update server capabilities if needed
+- [ ] Test integration with MCP protocol
+
+**Phase 4: Testing & Documentation**
+- [ ] Add unit tests
+- [ ] Add integration tests
+- [ ] Update docstrings
+- [ ] Update README if needed
+
+## 🔍 Quality Checklist
+
+**Code Quality:**
+- [ ] Follows existing code style and patterns
+- [ ] Has comprehensive type hints
+- [ ] Has clear, descriptive variable names
+- [ ] Has proper error handling
+- [ ] Has informative log messages
+- [ ] Has complete docstrings
+
+**Security Considerations:**
+- [ ] Input validation implemented
+- [ ] No dangerous PowerShell commands allowed
+- [ ] Proper timeout handling
+- [ ] Safe file operations (if applicable)
+
+**Performance Considerations:**
+- [ ] Async operations where appropriate
+- [ ] Proper resource cleanup
+- [ ] Efficient data processing
+- [ ] Reasonable memory usage
+
+## 🤖 Copilot-Specific Instructions
+
+**Coding Style:**
+- Use the same formatting and patterns as existing code in `server.py`
+- Follow the FastMCP library conventions
+- Use descriptive variable names that clearly indicate purpose
+- Include type hints for all parameters and return values
+
+**Error Handling Pattern:**
+```python
+try:
+    # Main logic here
+    if ctx:
+        await ctx.info("Operation started")
+    
+    # Validation
+    if not validate_input(param):
+        raise ValueError("Invalid input")
+        
+    # Core operation
+    result = await perform_operation(param)
+    
+    if ctx:
+        await ctx.info("Operation completed successfully")
+    return result
+    
+except Exception as e:
+    if ctx:
+        await ctx.error(f"Operation failed: {str(e)}")
+    raise
+```
+
+**Integration Points:**
+- Register tools with `@mcp.tool()` decorator
+- Register resources with `@mcp.resource("uri://pattern")` decorator  
+- Register prompts with `@mcp.prompt()` decorator
+- Use Context parameter for logging and progress reporting
+
+## 📎 Reference Materials
+
+**Existing Code Examples:**
+- Similar tool: `function_name_here`
+- Similar resource: `resource_name_here`
+- Error handling: `execute_powershell` function
+- Progress reporting: `run_powershell_with_progress` function
+
+**Documentation Links:**
+- MCP SDK: https://github.com/modelcontextprotocol/python-sdk
+- FastMCP: https://modelcontextprotocol.io/quickstart
+- PowerShell: https://docs.microsoft.com/powershell/
+
+**Additional Context:**
+<!-- Any other information that would help Copilot complete this task -->

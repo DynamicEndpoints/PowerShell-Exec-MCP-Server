@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Copilot Best Practices
+    url: https://docs.github.com/en/copilot/using-github-copilot/getting-started-with-github-copilot
+    about: Learn how to work effectively with GitHub Copilot
+  - name: MCP Documentation
+    url: https://modelcontextprotocol.io/
+    about: Model Context Protocol documentation and specifications

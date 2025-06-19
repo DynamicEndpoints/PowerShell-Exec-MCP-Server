@@ -1,0 +1,189 @@
+---
+name: ✨ Feature Request (Copilot Optimized)
+about: Suggest a new feature with technical specifications for Copilot implementation
+title: '[FEATURE] '
+labels: ['enhancement', 'needs-discussion', 'copilot-ready']
+assignees: ''
+---
+
+## ✨ Feature Overview
+
+**Feature Summary:**
+<!-- One-line description of the feature -->
+
+**Problem Statement:**
+<!-- What problem does this solve? What use case does it address? -->
+
+**Proposed Solution:**
+<!-- High-level description of your proposed solution -->
+
+## 🎯 Detailed Requirements
+
+**Functional Requirements:**
+1. 
+2. 
+3. 
+
+**Non-Functional Requirements:**
+- Performance: 
+- Security: 
+- Compatibility: 
+- Usability: 
+
+## 🛠️ Technical Specifications for Copilot
+
+**Implementation Areas:**
+- [ ] **MCP Tools** - New tool implementations
+- [ ] **MCP Resources** - New resource endpoints
+- [ ] **MCP Prompts** - New prompt templates
+- [ ] **PowerShell Integration** - PowerShell-specific functionality
+- [ ] **Template System** - Script template enhancements
+- [ ] **Error Handling** - Error management improvements
+- [ ] **Configuration** - Server configuration changes
+- [ ] **Documentation** - Documentation updates
+
+**Proposed API Design:**
+
+**New MCP Tool (if applicable):**
+```python
+@mcp.tool()
+async def new_feature_tool(
+    param1: str,
+    param2: Optional[int] = None,
+    ctx: Optional[Context] = None
+) -> str:
+    """
+    Tool description for Copilot analysis
+    
+    Args:
+        param1: Description
+        param2: Description
+        ctx: MCP context for logging
+        
+    Returns:
+        Description of return value
+    """
+    # Implementation logic here
+```
+
+**New MCP Resource (if applicable):**
+```python
+@mcp.resource("new-resource://{param}")
+def get_new_resource(param: str) -> str:
+    """
+    Resource description for Copilot analysis
+    
+    Args:
+        param: Description
+        
+    Returns:
+        Resource content
+    """
+    # Implementation logic here
+```
+
+**PowerShell Integration (if applicable):**
+```powershell
+# Provide sample PowerShell code that this feature should handle
+```
+
+## 📋 Implementation Checklist for Copilot
+
+**Code Changes Required:**
+- [ ] Update `server.py` with new tool/resource definitions
+- [ ] Add new functions in appropriate modules
+- [ ] Update type hints and documentation
+- [ ] Add input validation and error handling
+- [ ] Implement progress reporting (if applicable)
+- [ ] Add logging and debugging support
+
+**Testing Requirements:**
+- [ ] Unit tests for new functionality
+- [ ] Integration tests with MCP protocol
+- [ ] PowerShell compatibility testing
+- [ ] Error scenario testing
+- [ ] Performance testing (if applicable)
+
+**Documentation Updates:**
+- [ ] Update README.md with new features
+- [ ] Add docstrings to new functions
+- [ ] Update API documentation
+- [ ] Add usage examples
+- [ ] Update feature comparison tables
+
+**Configuration Changes:**
+- [ ] Update `pyproject.toml` dependencies (if needed)
+- [ ] Update server capabilities
+- [ ] Add new configuration options (if needed)
+- [ ] Update environment requirements
+
+## 🔗 Dependencies and Integrations
+
+**External Dependencies:**
+- New Python packages: 
+- PowerShell modules: 
+- System requirements: 
+
+**Integration Points:**
+- MCP Protocol: 
+- PowerShell Environment: 
+- Windows Services: 
+- File System: 
+
+## 📊 Acceptance Criteria
+
+**Definition of Done:**
+1. 
+2. 
+3. 
+
+**Success Metrics:**
+- Performance benchmarks: 
+- Compatibility requirements: 
+- User experience goals: 
+
+## 🤖 Copilot Implementation Guidance
+
+**Code Style Preferences:**
+- Follow existing patterns in `server.py`
+- Use type hints throughout
+- Include comprehensive docstrings
+- Implement proper error handling
+- Add progress reporting for long operations
+
+**File Structure:**
+```
+server.py                    # Main implementation
+templates/new_template.ps1   # If adding templates
+tests/test_new_feature.py    # Test coverage
+docs/new_feature.md         # Documentation
+```
+
+**Similar Implementations to Reference:**
+<!-- Point Copilot to existing code patterns to follow -->
+- Tool pattern: `run_powershell` function
+- Resource pattern: `get_system_info_resource` function
+- Error handling: `execute_powershell` function
+- Progress reporting: `run_powershell_with_progress` function
+
+## 💡 Alternative Solutions
+
+**Alternative Approach 1:**
+- Description: 
+- Pros: 
+- Cons: 
+
+**Alternative Approach 2:**
+- Description: 
+- Pros: 
+- Cons: 
+
+**Why the proposed solution is preferred:**
+
+## 📎 Additional Resources
+
+<!-- Links to relevant documentation, examples, or research -->
+- Related GitHub issues: 
+- Documentation links: 
+- Code examples: 
+- Research/inspiration: 

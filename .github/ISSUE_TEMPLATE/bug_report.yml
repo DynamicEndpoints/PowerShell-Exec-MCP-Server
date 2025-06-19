@@ -1,0 +1,114 @@
+---
+name: 🐛 Bug Report (Copilot Optimized)
+about: Report a bug with detailed environment information for Copilot analysis
+title: '[BUG] '
+labels: ['bug', 'needs-triage', 'copilot-ready']
+assignees: ''
+---
+
+## 🐛 Bug Description
+
+**Clear and concise description of the bug:**
+<!-- Provide a clear description that helps Copilot understand the issue -->
+
+**Expected behavior:**
+<!-- What should happen -->
+
+**Actual behavior:**
+<!-- What actually happens -->
+
+## 🔍 Reproduction Steps
+
+<!-- Provide step-by-step instructions that Copilot can follow -->
+1. 
+2. 
+3. 
+4. 
+
+**Minimal reproduction code:**
+```powershell
+# Paste your PowerShell code here
+```
+
+```python
+# If applicable, paste Python/MCP code here
+```
+
+## 🌍 Environment Details
+
+**System Information:**
+- OS: <!-- Windows 10/11, version -->
+- PowerShell Version: <!-- Get-Host | Select-Object Version -->
+- Python Version: <!-- python --version -->
+- MCP SDK Version: <!-- pip show mcp -->
+- Server Version: <!-- From pyproject.toml -->
+
+**PowerShell Environment:**
+- Execution Policy: <!-- Get-ExecutionPolicy -->
+- PSVersion Table:
+```powershell
+# Paste output of $PSVersionTable
+```
+
+**MCP Server Configuration:**
+- Transport: <!-- stdio, sse, http -->
+- Client: <!-- Claude Desktop, custom client, etc. -->
+
+## 📋 Logs and Error Messages
+
+**Error Output:**
+```
+Paste complete error messages here
+```
+
+**Server Logs:**
+```
+Paste relevant server logs here
+```
+
+**PowerShell Error Details:**
+```powershell
+# If applicable, paste $Error[0] | Format-List * -Force output
+```
+
+## 🧪 Testing Information
+
+**Have you tested this with:**
+- [ ] Different PowerShell commands
+- [ ] Different timeout values
+- [ ] Different MCP clients
+- [ ] Administrator privileges
+- [ ] Different user accounts
+
+**Related Issues:**
+<!-- Link any related issues -->
+
+## 🤖 Additional Context for Copilot
+
+**File Context:**
+<!-- List relevant files that Copilot should examine -->
+- [ ] `server.py` - Main server implementation
+- [ ] `templates/` - PowerShell templates
+- [ ] `pyproject.toml` - Project configuration
+- [ ] Other: 
+
+**Code Areas to Focus:**
+<!-- Help Copilot understand which parts of the codebase are most relevant -->
+- [ ] PowerShell execution (`execute_powershell` function)
+- [ ] MCP tool definitions
+- [ ] Resource handlers
+- [ ] Template processing
+- [ ] Error handling
+- [ ] Other: 
+
+**Analysis Hints:**
+<!-- Provide hints that help Copilot analyze the issue -->
+- Does this happen with all PowerShell commands or specific ones?
+- Is this related to timing/timeouts?
+- Could this be a permissions issue?
+- Is this MCP protocol related?
+- Other observations:
+
+## 📎 Attachments
+
+<!-- Attach any relevant files, screenshots, or additional logs -->
