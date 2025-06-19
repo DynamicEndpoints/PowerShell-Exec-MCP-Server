@@ -1,4 +1,5 @@
 # PowerShell Exec MCP Server
+[![smithery badge](https://smithery.ai/badge/@DynamicEndpoints/powershell-exec-mcp-server)](https://smithery.ai/server/@DynamicEndpoints/powershell-exec-mcp-server)
 
 A secure Model Context Protocol (MCP) server that provides controlled PowerShell command execution capabilities through MCP tools. This server includes security features to prevent dangerous commands and provides timeouts for command execution.
 
@@ -40,6 +41,15 @@ mcp-powershell-exec/
 
 ## Installation
 
+### Installing via Smithery
+
+To install PowerShell Exec Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@DynamicEndpoints/powershell-exec-mcp-server):
+
+```bash
+npx -y @smithery/cli install @DynamicEndpoints/powershell-exec-mcp-server --client claude
+```
+
+### Manual Installation
 1. Ensure you have Python 3.7+ installed
 2. Install the package:
 ```bash
@@ -422,3 +432,4 @@ Contributions are welcome! Please ensure any changes maintain the security stand
 ## License
 
 MIT License
+
