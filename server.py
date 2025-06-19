@@ -330,16 +330,59 @@ async def generate_intune_detection_script(
     output_path: Optional[str] = None,
     timeout: Optional[int] = 60
 ) -> str:
-    """Generate an Intune detection script.
+    """Generate a Microsoft Intune detection script with enterprise-grade compliance checking.
+    
+    Creates a PowerShell detection script that follows Microsoft Intune best practices:
+    - Proper exit codes (0=compliant, 1=non-compliant, 2=error)
+    - Event log integration for monitoring and troubleshooting
+    - Fast execution optimized for frequent compliance checks
+    - Comprehensive error handling and logging
+    - No user interaction (required for Intune deployment)
+    
+    💡 TIP: For complete Intune compliance, you need BOTH detection and remediation scripts.
+    Consider using 'generate_intune_script_pair' to create both scripts together with matching logic.
+    
+    Microsoft References:
+    - Intune Detection Scripts: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations
+    - Best Practices: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations-script-samples
+    - PowerShell Requirements: https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+    - Exit Code Standards: https://docs.microsoft.com/en-us/mem/intune/apps/troubleshoot-mam-app-deployment
     
     Args:
-        description: What the script should detect
-        detection_logic: PowerShell code that performs the detection
-        output_path: Where to save the script (optional)
+        description: Clear description of what the script should detect (e.g., 'Check if Chrome is installed with correct version', 'Verify Windows firewall is enabled')
+        detection_logic: PowerShell code that performs the compliance check. Use 'Complete-Detection -Compliant $true/$false -Message "status"' to indicate result
+        output_path: Optional file path where the script will be saved. If not provided, returns script content
         timeout: Command timeout in seconds (1-300, default 60)
         
     Returns:
         Generated script content or path where script was saved
+        
+    Example:
+        Generate a script to detect Chrome installation:
+        ```
+        result = await generate_intune_detection_script(
+            description="Check if Chrome browser is installed with version 100.0.0.0 or higher",
+            detection_logic='''
+            try {
+                $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+                $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+                $compliant = [version]$version -ge [version]"100.0.0.0"
+                Complete-Detection -Compliant $compliant -Message "Chrome version: $version (Required: 100.0.0.0+)"
+            } catch {
+                Complete-Detection -Compliant $false -Message "Chrome not found or inaccessible"
+            }
+            ''',
+            output_path="detect_chrome.ps1"
+        )
+        ```
+        
+    Tips:
+        - Keep detection logic fast and efficient (runs frequently)
+        - Always use Complete-Detection function to set proper exit codes
+        - Use try-catch blocks for robust error handling
+        - Test detection logic thoroughly in different environments
+        - Use Write-IntuneLog for detailed progress tracking
+        - Avoid making changes in detection scripts (read-only operations)
     """
     params = {
         "SYNOPSIS": f"Intune Detection Script - {description}",
@@ -360,23 +403,64 @@ async def generate_intune_remediation_script(
     output_path: Optional[str] = None,
     timeout: Optional[int] = 60
 ) -> str:
-    """Generate an Intune remediation script.
+    """Generate a Microsoft Intune remediation script with enterprise-grade features.
+    
+    Creates a PowerShell remediation script that follows Microsoft Intune best practices:
+    - Proper exit codes (0=success, 1=failure, 2=error)
+    - Event log integration for monitoring and troubleshooting
+    - System restore point creation before making changes
+    - Comprehensive error handling and logging
+    - No user interaction (required for Intune deployment)
+    
+    ⚠️  IMPORTANT: For complete Intune compliance, you need BOTH detection and remediation scripts.
+    Consider using 'generate_intune_script_pair' instead to create both scripts together.
+    
+    Microsoft References:
+    - Intune Remediation Scripts: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations
+    - Best Practices: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations-script-samples
+    - PowerShell Script Requirements: https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+    - Exit Code Standards: https://docs.microsoft.com/en-us/mem/intune/apps/troubleshoot-mam-app-installation#exit-codes
     
     Args:
-        description: What the script should remediate
-        remediation_logic: PowerShell code that performs the remediation
-        output_path: Where to save the script (optional)
+        description: Clear description of what the script should remediate (e.g., 'Install Chrome browser', 'Configure Windows firewall')
+        remediation_logic: PowerShell code that performs the remediation. Use 'Complete-Remediation -Success $true -Message "description"' to indicate completion
+        output_path: Optional file path where the script will be saved. If not provided, returns script content
         timeout: Command timeout in seconds (1-300, default 60)
         
     Returns:
         Generated script content or path where script was saved
+        
+    Example:
+        Generate a script to install Chrome:
+        ```
+        result = await generate_intune_remediation_script(
+            description="Install Chrome browser to latest version",
+            remediation_logic='''
+            $installer = "$env:TEMP\\ChromeSetup.exe"
+            Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer
+            Start-Process -FilePath $installer -Args "/silent /install" -Wait
+            Remove-Item $installer -Force
+            Complete-Remediation -Success $true -Message "Chrome installation completed successfully"
+            ''',
+            output_path="remediate_chrome.ps1"
+        )
+        ```
+        
+    Tips:
+        - Always use Complete-Remediation function to set proper exit codes
+        - Test your remediation_logic in a safe environment first
+        - Consider creating a system restore point for major changes
+        - Use Write-IntuneLog for detailed logging and troubleshooting
+        - Ensure no user interaction is required (scripts run silently)
     """
     params = {
-        "SYNOPSIS": f"Intune Remediation Script - {description}",
-        "DESCRIPTION": description,
+        "SYNOPSIS": f"Intune Remediation Script - {description}",        "DESCRIPTION": description,
         "DATE": datetime.now().strftime('%Y-%m-%d'),
         "REMEDIATION_LOGIC": remediation_logic
     }
+    
+    if output_path:
+        output_path = ensure_directory(output_path)
     
     return await generate_script_from_template("intune_remediation", params, output_path, timeout)
 
@@ -388,17 +472,75 @@ async def generate_intune_script_pair(
     output_dir: Optional[str] = None,
     timeout: Optional[int] = 60
 ) -> Dict[str, str]:
-    """Generate a pair of Intune detection and remediation scripts.
+    """Generate a complete pair of Microsoft Intune detection and remediation scripts.
+    
+    This is the RECOMMENDED tool for Intune compliance as it creates both required scripts:
+    - Detection script: Checks current system state and determines compliance
+    - Remediation script: Fixes non-compliant conditions with proper safeguards
+    
+    Both scripts follow Microsoft Intune best practices:
+    - Proper exit codes (Detection: 0=compliant, 1=non-compliant, 2=error; Remediation: 0=success, 1=failure, 2=error)
+    - Event log integration for centralized monitoring
+    - System restore points before changes (remediation only)
+    - Comprehensive error handling and logging
+    - No user interaction (silent execution required)
+    
+    Microsoft References:
+    - Intune Remediation Scripts Overview: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations
+    - Script Deployment Best Practices: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations-script-samples
+    - PowerShell Requirements: https://docs.microsoft.com/en-us/mem/intune/apps/intune-management-extension
+    - Exit Code Standards: https://docs.microsoft.com/en-us/mem/intune/apps/troubleshoot-mam-app-deployment
+    - Monitoring and Reporting: https://docs.microsoft.com/en-us/mem/intune/fundamentals/remediations-monitor
     
     Args:
-        description: What the scripts should detect and remediate
-        detection_logic: PowerShell code that performs the detection
-        remediation_logic: PowerShell code that performs the remediation
-        output_dir: Directory to save the scripts (optional)
+        description: Clear description of what the scripts should detect and remediate (e.g., 'Ensure Chrome browser is installed with latest version')
+        detection_logic: PowerShell code that performs the compliance check. Use 'Complete-Detection -Compliant $true/$false -Message "status"' to indicate result
+        remediation_logic: PowerShell code that fixes non-compliant conditions. Use 'Complete-Remediation -Success $true/$false -Message "result"' to indicate completion
+        output_dir: Optional directory to save both scripts. If not provided, returns script content in response
         timeout: Command timeout in seconds (1-300, default 60)
         
     Returns:
-        Dictionary containing paths or content of both scripts
+        Dictionary containing both scripts: {"detection_script": "content/path", "remediation_script": "content/path"}
+        
+    Example:
+        Generate scripts to manage Chrome browser installation:
+        ```
+        result = await generate_intune_script_pair(
+            description="Ensure Chrome browser is installed with version 100.0.0.0 or higher",
+            detection_logic='''
+            try {
+                $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+                $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+                $compliant = [version]$version -ge [version]"100.0.0.0"
+                Complete-Detection -Compliant $compliant -Message "Chrome version: $version (Required: 100.0.0.0+)"
+            } catch {
+                Complete-Detection -Compliant $false -Message "Chrome not found or inaccessible"
+            }
+            ''',
+            remediation_logic='''
+            try {
+                $installer = "$env:TEMP\\ChromeSetup.exe"
+                Write-IntuneLog "Downloading Chrome installer..."
+                Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer -UseBasicParsing
+                Write-IntuneLog "Installing Chrome silently..."
+                Start-Process -FilePath $installer -Args "/silent /install" -Wait
+                Remove-Item $installer -Force
+                Complete-Remediation -Success $true -Message "Chrome installation completed successfully"
+            } catch {
+                Complete-Remediation -Success $false -Message "Chrome installation failed: $($_.Exception.Message)"
+            }
+            ''',
+            output_dir="chrome_intune_scripts"
+        )
+        ```
+        
+    Tips:
+        - Always test both scripts in a controlled environment first
+        - Use descriptive logging messages for easier troubleshooting
+        - Consider the impact of remediation actions (e.g., system restarts, user disruption)
+        - Use Write-IntuneLog for detailed progress tracking
+        - Ensure detection logic is fast and efficient (runs frequently)
+        - Make remediation logic idempotent (safe to run multiple times)
     """
     if output_dir:
         # Create output directory in current working directory
