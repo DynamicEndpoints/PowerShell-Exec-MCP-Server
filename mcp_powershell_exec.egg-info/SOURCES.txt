@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+mcp_powershell_exec.egg-info/PKG-INFO
+mcp_powershell_exec.egg-info/SOURCES.txt
+mcp_powershell_exec.egg-info/dependency_links.txt
+mcp_powershell_exec.egg-info/entry_points.txt
+mcp_powershell_exec.egg-info/requires.txt
+mcp_powershell_exec.egg-info/top_level.txt

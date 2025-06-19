@@ -1,0 +1,2 @@
+[console_scripts]
+mcp-powershell-exec = mcp_powershell_exec.__main__:main

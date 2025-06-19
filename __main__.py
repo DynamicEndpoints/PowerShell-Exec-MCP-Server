@@ -1,5 +1,5 @@
 """Main entry point for MCP PowerShell server."""
-from . import mcp
+from .server import mcp
 
 def main():
     """Run the MCP PowerShell server."""
