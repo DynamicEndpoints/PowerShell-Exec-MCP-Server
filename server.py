@@ -25,7 +25,7 @@ from collections.abc import AsyncIterator
 # Create an MCP server with better metadata and dependencies
 mcp = FastMCP(
     "PowerShell Integration Server",
-    description="Secure PowerShell command execution and script generation for Windows system administration",
+    description="Secure PowerShell command execution and script generation for Windows system administration, including Intune and BigFix deployment scripts",
     dependencies=["asyncio", "psutil>=5.9.0"],
     capabilities={
         "tools": True,
@@ -581,6 +581,279 @@ async def generate_intune_script_pair(
     return {
         "detection_script": detect_result,
         "remediation_script": remedy_result
+    }
+
+@mcp.tool()
+async def generate_bigfix_relevance_script(
+    description: str,
+    relevance_logic: str,
+    output_path: Optional[str] = None,
+    timeout: Optional[int] = 60
+) -> str:
+    """Generate a BigFix relevance script to determine if computers need action.
+    
+    Creates a PowerShell relevance script that follows IBM BigFix best practices:
+    - Proper output format (TRUE/FALSE for BigFix consumption)
+    - BigFix client log integration for monitoring
+    - Event log integration for troubleshooting
+    - Comprehensive error handling and logging
+    - Fast execution optimized for frequent evaluations
+    
+    💡 TIP: For complete BigFix deployments, you need BOTH relevance and action scripts.
+    Consider using 'generate_bigfix_script_pair' to create both scripts together with matching logic.
+    
+    IBM BigFix References:
+    - Relevance Language Guide: https://help.hcltechsw.com/bigfix/11.0/relevance/Relevance/c_relevance_language.html
+    - Action Scripts: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_creating_action_scripts.html
+    - Best Practices: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_best_practices_for_creating_fixlets.html
+    - Client Logging: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Installation/c_bes_client_logging.html
+    
+    Args:
+        description: Clear description of what the script should check (e.g., 'Check if Chrome needs updating', 'Verify Windows patches are current')
+        relevance_logic: PowerShell code that determines relevance. Use 'Complete-Relevance -Relevant $true/$false -Message "status"' to indicate result
+        output_path: Optional file path where the script will be saved. If not provided, returns script content
+        timeout: Command timeout in seconds (1-300, default 60)
+        
+    Returns:
+        Generated script content or path where script was saved
+        
+    Example:
+        Generate a script to check if Chrome needs updating:
+        ```
+        result = await generate_bigfix_relevance_script(
+            description="Check if Chrome browser needs updating to version 100.0.0.0 or higher",
+            relevance_logic=''',
+            try {
+                $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+                $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+                $needsUpdate = [version]$version -lt [version]"100.0.0.0"
+                Complete-Relevance -Relevant $needsUpdate -Message "Chrome version: $version (Target: 100.0.0.0+)"
+            } catch {
+                Complete-Relevance -Relevant $true -Message "Chrome not found or inaccessible - installation needed"
+            }
+            ''',
+            output_path="chrome_relevance.ps1"
+        )
+        ```
+        
+    Tips:
+        - Keep relevance logic fast and efficient (evaluated frequently)
+        - Return TRUE when action is needed, FALSE when compliant
+        - Always use Complete-Relevance function for proper BigFix output format
+        - Use try-catch blocks for robust error handling
+        - Test relevance logic thoroughly across different environments
+        - Use Write-BigFixLog for detailed progress tracking
+    """
+    params = {
+        "SYNOPSIS": f"BigFix Relevance Script - {description}",
+        "DESCRIPTION": description,
+        "DATE": datetime.now().strftime('%Y-%m-%d'),
+        "RELEVANCE_LOGIC": relevance_logic
+    }
+    
+    if output_path:
+        output_path = ensure_directory(output_path)
+    
+    return await generate_script_from_template("bigfix_relevance", params, output_path, timeout)
+
+@mcp.tool()
+async def generate_bigfix_action_script(
+    description: str,
+    action_logic: str,
+    output_path: Optional[str] = None,
+    timeout: Optional[int] = 60
+) -> str:
+    """Generate a BigFix action script to perform remediation or configuration changes.
+    
+    Creates a PowerShell action script that follows IBM BigFix best practices:
+    - Proper exit codes (0=success, 1=retryable failure, 2=non-retryable failure)
+    - BigFix client log integration for monitoring
+    - System restore point creation before changes
+    - Comprehensive error handling and logging
+    - Event log integration for troubleshooting
+    
+    ⚠️ IMPORTANT: For complete BigFix deployments, you need BOTH relevance and action scripts.
+    Consider using 'generate_bigfix_script_pair' instead to create both scripts together.
+    
+    IBM BigFix References:
+    - Action Scripts: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_creating_action_scripts.html
+    - Exit Codes: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_action_script_exit_codes.html
+    - Best Practices: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_best_practices_for_creating_fixlets.html
+    - Client Logging: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Installation/c_bes_client_logging.html
+    
+    Args:
+        description: Clear description of what the script should accomplish (e.g., 'Install Chrome browser', 'Configure Windows firewall')
+        action_logic: PowerShell code that performs the action. Use 'Complete-Action -Result "Success/RetryableFailure/NonRetryableFailure" -Message "details"' to indicate completion
+        output_path: Optional file path where the script will be saved. If not provided, returns script content
+        timeout: Command timeout in seconds (1-300, default 60)
+        
+    Returns:
+        Generated script content or path where script was saved
+        
+    Example:
+        Generate a script to install Chrome:
+        ```
+        result = await generate_bigfix_action_script(
+            description="Install Chrome browser to latest version",
+            action_logic='''
+            try {
+                $installer = "$env:TEMP\\ChromeSetup.exe"
+                Write-BigFixLog "Downloading Chrome installer..."
+                Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer -UseBasicParsing
+                Write-BigFixLog "Installing Chrome silently..."
+                Start-Process -FilePath $installer -Args "/silent /install" -Wait
+                Remove-Item $installer -Force
+                Complete-Action -Result "Success" -Message "Chrome installation completed successfully"
+            } catch {
+                Complete-Action -Result "RetryableFailure" -Message "Chrome installation failed: $($_.Exception.Message)"
+            }
+            ''',
+            output_path="chrome_action.ps1"
+        )
+        ```
+        
+    Tips:
+        - Always use Complete-Action function to set proper exit codes
+        - Use "Success" for completed actions
+        - Use "RetryableFailure" for temporary issues (network, locks, etc.)
+        - Use "NonRetryableFailure" for permanent issues (unsupported OS, etc.)
+        - Test action logic in safe environments first
+        - Consider creating system restore points for major changes
+        - Use Write-BigFixLog for detailed logging and troubleshooting
+        - Make actions idempotent (safe to run multiple times)
+    """
+    params = {
+        "SYNOPSIS": f"BigFix Action Script - {description}",
+        "DESCRIPTION": description,
+        "DATE": datetime.now().strftime('%Y-%m-%d'),
+        "ACTION_LOGIC": action_logic
+    }
+    
+    if output_path:
+        output_path = ensure_directory(output_path)
+    
+    return await generate_script_from_template("bigfix_action", params, output_path, timeout)
+
+@mcp.tool()
+async def generate_bigfix_script_pair(
+    description: str,
+    relevance_logic: str,
+    action_logic: str,
+    output_dir: Optional[str] = None,
+    timeout: Optional[int] = 60
+) -> Dict[str, str]:
+    """Generate a complete pair of BigFix relevance and action scripts for deployment.
+    
+    This is the RECOMMENDED tool for BigFix fixlet creation as it creates both required scripts:
+    - Relevance script: Determines which computers need the action (TRUE/FALSE output)
+    - Action script: Performs the necessary changes with proper error handling
+    
+    Both scripts follow IBM BigFix best practices:
+    - Proper BigFix output formats and exit codes
+    - BigFix client log integration for centralized monitoring
+    - System restore points before changes (action only)
+    - Comprehensive error handling and logging
+    - Event log integration for troubleshooting
+    - No user interaction (silent execution required)
+    
+    IBM BigFix References:
+    - Fixlet Development: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_creating_fixlets.html
+    - Relevance Language: https://help.hcltechsw.com/bigfix/11.0/relevance/Relevance/c_relevance_language.html
+    - Action Scripts: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_creating_action_scripts.html
+    - Best Practices: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_best_practices_for_creating_fixlets.html
+    - Testing Guidelines: https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Console/c_testing_fixlets.html
+    
+    Args:
+        description: Clear description of what the scripts should accomplish (e.g., 'Manage Chrome browser installation and updates')
+        relevance_logic: PowerShell code that determines if action is needed. Use 'Complete-Relevance -Relevant $true/$false -Message "status"' to indicate result
+        action_logic: PowerShell code that performs the remediation. Use 'Complete-Action -Result "Success/RetryableFailure/NonRetryableFailure" -Message "details"' to indicate completion
+        output_dir: Optional directory to save both scripts. If not provided, returns script content in response
+        timeout: Command timeout in seconds (1-300, default 60)
+        
+    Returns:
+        Dictionary containing both scripts: {"relevance_script": "content/path", "action_script": "content/path"}
+        
+    Example:
+        Generate scripts to manage Chrome browser installation:
+        ```
+        result = await generate_bigfix_script_pair(
+            description="Manage Chrome browser installation with version 100.0.0.0 or higher",
+            relevance_logic=''',
+            try {
+                $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+                $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+                $needsAction = [version]$version -lt [version]"100.0.0.0"
+                Complete-Relevance -Relevant $needsAction -Message "Chrome version: $version (Target: 100.0.0.0+)"
+            } catch {
+                Complete-Relevance -Relevant $true -Message "Chrome not found - installation needed"
+            }
+            ''',
+            action_logic=''',
+            try {
+                $installer = "$env:TEMP\\ChromeSetup.exe"
+                Write-BigFixLog "Downloading Chrome installer..."
+                Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer -UseBasicParsing
+                Write-BigFixLog "Installing Chrome silently..."
+                Start-Process -FilePath $installer -Args "/silent /install" -Wait
+                Remove-Item $installer -Force
+                Complete-Action -Result "Success" -Message "Chrome installation completed successfully"
+            } catch {
+                Complete-Action -Result "RetryableFailure" -Message "Chrome installation failed: $($_.Exception.Message)"
+            }
+            ''',
+            output_dir="chrome_bigfix_scripts"
+        )
+        ```
+        
+    Tips:
+        - Always test both scripts in a controlled environment first
+        - Ensure relevance logic matches the conditions that action script addresses
+        - Use descriptive logging messages for easier troubleshooting
+        - Consider the scope and impact of actions (test groups first)
+        - Make sure relevance logic is efficient (evaluated frequently)
+        - Ensure action logic is idempotent (safe to run multiple times)
+        - Use Write-BigFixLog for detailed progress tracking
+        - Test across different OS versions and configurations
+    """
+    if output_dir:
+        # Create output directory in current working directory
+        abs_output_dir = ensure_directory(output_dir)
+        
+        # Create full paths for scripts
+        relevance_path = os.path.join(abs_output_dir, "relevance.ps1")
+        action_path = os.path.join(abs_output_dir, "action.ps1")
+        
+        # Create parent directory if it doesn't exist
+        os.makedirs(abs_output_dir, exist_ok=True)
+        
+        relevance_result = await generate_bigfix_relevance_script(
+            description=description,
+            relevance_logic=relevance_logic,
+            output_path=relevance_path,
+            timeout=timeout
+        )        
+        action_result = await generate_bigfix_action_script(
+            description=description,
+            action_logic=action_logic,
+            output_path=action_path,
+            timeout=timeout
+        )
+    else:
+        relevance_result = await generate_bigfix_relevance_script(
+            description=description,
+            relevance_logic=relevance_logic,
+            timeout=timeout
+        )
+        
+        action_result = await generate_bigfix_action_script(
+            description=description,
+            action_logic=action_logic,
+            timeout=timeout
+        )
+    
+    return {
+        "relevance_script": relevance_result,
+        "action_script": action_result
     }
 
 async def execute_powershell(code: str, timeout: Optional[int] = 60, ctx: Optional[Context] = None) -> str:

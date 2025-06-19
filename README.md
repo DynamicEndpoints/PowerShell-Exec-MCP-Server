@@ -13,6 +13,8 @@ A secure Model Context Protocol (MCP) server that provides controlled PowerShell
 - PowerShell script generation
 - Template-based script generation
 - Dynamic script generation
+- Microsoft Intune detection and remediation script generation
+- IBM BigFix relevance and action script generation
 - Command timeout support
 - Blocking of dangerous commands
 - Non-interactive and profile-less execution
@@ -31,7 +33,9 @@ mcp-powershell-exec/
 │   │   ├── basic_script.ps1   # Basic script template
 │   │   ├── system_inventory.ps1 # System inventory template
 │   │   ├── intune_detection.ps1 # Intune detection script template
-│   │   └── intune_remediation.ps1 # Intune remediation script template
+│   │   ├── intune_remediation.ps1 # Intune remediation script template
+│   │   ├── bigfix_relevance.ps1 # BigFix relevance script template
+│   │   └── bigfix_action.ps1  # BigFix action script template
 │   └── py.typed               # Type hints marker
 ├── pyproject.toml             # Project metadata and dependencies
 ├── setup.py                   # Package installation
@@ -379,6 +383,157 @@ result = await generate_intune_script_pair(
     Complete-Remediation -Success $true -Message "Security settings configured"
     """,
     output_dir="security_scripts"
+)
+```
+
+## BigFix Script Generation Tools
+
+### generate_bigfix_relevance_script
+
+Generate BigFix relevance scripts to determine if computers need action.
+
+Parameters:
+- `description` (required): What the script should check
+- `relevance_logic` (required): PowerShell code that determines relevance
+- `output_path` (optional): Where to save the script
+- `timeout` (optional): Command timeout in seconds (1-300, default 60)
+
+Example:
+```python
+result = await generate_bigfix_relevance_script(
+    description="Check if Chrome needs updating to version 100.0.0.0",
+    relevance_logic="""
+    try {
+        $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+        $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+        $needsUpdate = [version]$version -lt [version]"100.0.0.0"
+        Complete-Relevance -Relevant $needsUpdate -Message "Chrome version: $version (Target: 100.0.0.0+)"
+    } catch {
+        Complete-Relevance -Relevant $true -Message "Chrome not found - installation needed"
+    }
+    """,
+    output_path="chrome_relevance.ps1"
+)
+```
+
+### generate_bigfix_action_script
+
+Generate BigFix action scripts to perform remediation or configuration changes.
+
+Parameters:
+- `description` (required): What the script should accomplish
+- `action_logic` (required): PowerShell code that performs the action
+- `output_path` (optional): Where to save the script
+- `timeout` (optional): Command timeout in seconds (1-300, default 60)
+
+Example:
+```python
+result = await generate_bigfix_action_script(
+    description="Install Chrome browser to latest version",
+    action_logic="""
+    try {
+        $installer = "$env:TEMP\\ChromeSetup.exe"
+        Write-BigFixLog "Downloading Chrome installer..."
+        Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer -UseBasicParsing
+        Write-BigFixLog "Installing Chrome silently..."
+        Start-Process -FilePath $installer -Args "/silent /install" -Wait
+        Remove-Item $installer -Force
+        Complete-Action -Result "Success" -Message "Chrome installation completed successfully"
+    } catch {
+        Complete-Action -Result "RetryableFailure" -Message "Chrome installation failed: $($_.Exception.Message)"
+    }
+    """,
+    output_path="chrome_action.ps1"
+)
+```
+
+### generate_bigfix_script_pair
+
+Generate both relevance and action scripts as a matched pair for BigFix fixlet deployment.
+
+Parameters:
+- `description` (required): What the scripts should accomplish
+- `relevance_logic` (required): PowerShell code that determines relevance
+- `action_logic` (required): PowerShell code that performs the action
+- `output_dir` (optional): Directory to save the scripts
+- `timeout` (optional): Command timeout in seconds (1-300, default 60)
+
+Example Usage:
+
+1. Chrome Browser Management:
+```python
+result = await generate_bigfix_script_pair(
+    description="Manage Chrome browser installation with version 100.0.0.0 or higher",
+    relevance_logic="""
+    try {
+        $app = Get-ItemProperty "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe" -ErrorAction Stop
+        $version = (Get-Item $app.'(Default)').VersionInfo.FileVersion
+        $needsAction = [version]$version -lt [version]"100.0.0.0"
+        Complete-Relevance -Relevant $needsAction -Message "Chrome version: $version (Target: 100.0.0.0+)"
+    } catch {
+        Complete-Relevance -Relevant $true -Message "Chrome not found - installation needed"
+    }
+    """,
+    action_logic="""
+    try {
+        $installer = "$env:TEMP\\ChromeSetup.exe"
+        Write-BigFixLog "Downloading Chrome installer..."
+        Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/latest/chrome_installer.exe" -OutFile $installer -UseBasicParsing
+        Write-BigFixLog "Installing Chrome silently..."
+        Start-Process -FilePath $installer -Args "/silent /install" -Wait
+        Remove-Item $installer -Force
+        Complete-Action -Result "Success" -Message "Chrome installation completed successfully"
+    } catch {
+        Complete-Action -Result "RetryableFailure" -Message "Chrome installation failed: $($_.Exception.Message)"
+    }
+    """,
+    output_dir="chrome_bigfix_scripts"
+)
+```
+
+2. Windows Update Configuration:
+```python
+result = await generate_bigfix_script_pair(
+    description="Ensure Windows Update service is running and configured properly",
+    relevance_logic="""
+    $service = Get-Service -Name "wuauserv" -ErrorAction SilentlyContinue
+    $needsAction = ($service.Status -ne "Running") -or ($service.StartType -ne "Automatic")
+    Complete-Relevance -Relevant $needsAction -Message "Windows Update service status: $($service.Status), StartType: $($service.StartType)"
+    """,
+    action_logic="""
+    try {
+        Set-Service -Name "wuauserv" -StartupType Automatic
+        Start-Service -Name "wuauserv"
+        Complete-Action -Result "Success" -Message "Windows Update service configured and started"
+    } catch {
+        Complete-Action -Result "RetryableFailure" -Message "Failed to configure Windows Update service: $($_.Exception.Message)"
+    }
+    """,
+    output_dir="windows_update_bigfix_scripts"
+)
+```
+
+3. Security Settings Configuration:
+```python
+result = await generate_bigfix_script_pair(
+    description="Ensure basic Windows security settings are properly configured",
+    relevance_logic="""
+    $firewall = Get-NetFirewallProfile
+    $uac = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System).EnableLUA
+    $firewallOk = ($firewall | Where-Object { $_.Enabled -eq $false }).Count -eq 0
+    $needsAction = (-not $firewallOk) -or ($uac -ne 1)
+    Complete-Relevance -Relevant $needsAction -Message "Security settings check - Firewall OK: $firewallOk, UAC Enabled: $($uac -eq 1)"
+    """,
+    action_logic="""
+    try {
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+        Set-ItemProperty -Path HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name EnableLUA -Value 1
+        Complete-Action -Result "Success" -Message "Security settings configured successfully"
+    } catch {
+        Complete-Action -Result "RetryableFailure" -Message "Failed to configure security settings: $($_.Exception.Message)"
+    }
+    """,
+    output_dir="security_bigfix_scripts"
 )
 ```
 

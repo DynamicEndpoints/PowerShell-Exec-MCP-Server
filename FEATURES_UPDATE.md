@@ -34,6 +34,48 @@ Your MCP PowerShell server has been updated to use the latest features from the 
 - Better path handling with proper validation
 - Enhanced error messages and debugging information
 
+## 🆕 NEW: IBM BigFix Script Generation
+
+The PowerShell MCP server now includes comprehensive support for IBM BigFix fixlet development with three new tools:
+
+### BigFix Relevance Scripts
+- Generate PowerShell-based relevance scripts that determine which computers need action
+- Proper TRUE/FALSE output format for BigFix consumption
+- BigFix client log integration for monitoring and troubleshooting
+- Fast execution optimized for frequent evaluations
+
+### BigFix Action Scripts  
+- Generate PowerShell-based action scripts for remediation and configuration
+- Proper exit codes (0=success, 1=retryable failure, 2=non-retryable failure)
+- System restore point creation before changes
+- Comprehensive error handling and logging
+
+### BigFix Script Pairs
+- Generate complete relevance + action script pairs for fixlet deployment
+- Ensures matching logic between detection and remediation
+- Follows IBM BigFix best practices and documentation standards
+- Ready for deployment in BigFix console
+
+### Key Benefits
+- **Enterprise-Ready**: Scripts follow IBM BigFix best practices and documentation
+- **Comprehensive Logging**: Integration with BigFix client logs and Windows Event Log
+- **Error Handling**: Robust error handling with appropriate exit codes
+- **Safety Features**: System restore points and idempotent operations
+- **Documentation**: Extensive inline documentation and references to IBM BigFix docs
+
+### Example BigFix Fixlet Generation
+```python
+# Generate complete BigFix fixlet scripts for Chrome management
+result = await generate_bigfix_script_pair(
+    description="Manage Chrome browser installation with version 100.0.0.0 or higher",
+    relevance_logic="# PowerShell code to check if Chrome needs updating",
+    action_logic="# PowerShell code to install/update Chrome",
+    output_dir="chrome_bigfix_fixlet"
+)
+```
+
+This enhancement makes the PowerShell MCP server a comprehensive solution for both **Microsoft Intune** and **IBM BigFix** enterprise management platforms.
+
 ## 🛠️ Technical Improvements
 
 ### Dependencies Updated
@@ -54,7 +96,7 @@ capabilities = {
 }
 ```
 
-## 📊 Available Tools (11 total)
+## 📊 Available Tools (14 total)
 1. `run_powershell` - Basic secure PowerShell execution
 2. `run_powershell_with_progress` - Enhanced execution with progress reporting
 3. `get_system_info` - System information retrieval
@@ -66,11 +108,16 @@ capabilities = {
 9. `generate_intune_detection_script` - Intune detection script generation
 10. `generate_intune_remediation_script` - Intune remediation script generation
 11. `generate_intune_script_pair` - Complete Intune solution pairs
+12. `generate_bigfix_relevance_script` - BigFix relevance script generation  **NEW!**
+13. `generate_bigfix_action_script` - BigFix action script generation  **NEW!**
+14. `generate_bigfix_script_pair` - Complete BigFix fixlet pairs  **NEW!**
 
-## 📄 Available Resources (3 total)
+## 📄 Available Resources (5 total)
 1. `system://info` - Real-time system information and metrics
 2. `templates://list` - Available PowerShell script templates
 3. `template://{template_name}` - Individual template content
+4. `template://bigfix_relevance` - BigFix relevance script template  **NEW!**
+5. `template://bigfix_action` - BigFix action script template  **NEW!**
 
 ## 💬 Available Prompts (2 total)
 1. `powershell_best_practices` - Script development guidance
