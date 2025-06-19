@@ -1,6 +1,6 @@
 # PowerShell Exec MCP Server
 
-A secure Model Context Protocol (MCP) server that provides controlled PowerShell command execution capabilities through MCP tools. This server includes security features to prevent dangerous commands and provides timeouts for command execution.
+A secure Model Context Protocol (MCP) server that provides controlled PowerShell command execution capabilities through MCP tools. This server includes security features to prevent dangerous commands, provides timeouts for command execution, and specializes in enterprise script generation for **Microsoft Intune** and **IBM BigFix** management platforms.
 
 ## Features
 
